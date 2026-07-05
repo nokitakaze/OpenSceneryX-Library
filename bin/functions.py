@@ -16,13 +16,15 @@ import classes
 import fnmatch
 import sys
 import random
+import platform
+import os
 
 # Markdown support. Also needs the markdown-headdown extension to automatically demote headings
 # $ pip3 install markdown
 # $ pip3 install markdown-headdown
 import markdown
 
-from distutils.version import LooseVersion
+from looseversion import LooseVersion
 from colorama import Fore, Style
 
 try:
@@ -1902,13 +1904,19 @@ def getInput(message, maxSize):
 
 def osNotify(message = ""):
 	""" Send an operating system notification """
-	# On Mac: Requires terminal-notifier to be installed:
-	# gem install terminal-notifier
-	t = '-title OpenSceneryX Build Script'
-	m = '-message {!r}'.format(message)
-	i = '-appIcon {!r}'.format(os.path.join(classes.Configuration.supportFolder, "x_print.png"))
-	ci = '-contentImage {!r}'.format(os.path.join(classes.Configuration.supportFolder, "x_print.png"))
-	os.system('terminal-notifier {}'.format(' '.join([m, t, i, ci])))
+	# Check if we are on macOS
+	if sys.platform == 'darwin':
+		t = '-title OpenSceneryX Build Script'
+		m = '-message {!r}'.format(message)
+		i = '-appIcon {!r}'.format(os.path.join(classes.Configuration.supportFolder, "x_print.png"))
+		ci = '-contentImage {!r}'.format(os.path.join(classes.Configuration.supportFolder, "x_print.png"))
+		os.system('terminal-notifier {}'.format(' '.join([m, t, i, ci])))
+	elif sys.platform.startswith('linux') and 'GITHUB_ACTIONS' not in os.environ:
+		# For local development on Linux, we can use notify-send
+		os.system('notify-send "OpenSceneryX Build Script" {!r}'.format(message))
+	else:
+		# On Windows or in CI/CD environments, do nothing
+		pass
 
 
 def writePDFSectionHeading(title, newPageBefore = 0):

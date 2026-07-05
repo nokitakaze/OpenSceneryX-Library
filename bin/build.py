@@ -9,6 +9,7 @@
 import sys
 import traceback
 import random
+import argparse
 
 try:
 	import classes
@@ -42,16 +43,31 @@ try:
 			functions.displayMessage("This script must be run from the 'bin' directory inside a full checkout of the scenery library\n", "error")
 			sys.exit()
 
+		parser = argparse.ArgumentParser()
+		parser.add_argument('--build-tag', dest='build_tag', type=str, default=None)
+		args, unknown = parser.parse_known_args()
+
+		has_build_tag = args.build_tag is not None
+
 		versionTag = ""
-		while versionTag == "":
-			versionTag = functions.getInput("Enter the library version number (e.g. 1.0.1): ", 10)
+		if has_build_tag:
+			versionTag = args.build_tag
+		else:
+			while versionTag == "":
+				versionTag = functions.getInput("Enter the library version number (e.g. 1.0.1): ", 10)
 
 		sinceVersionTag = ""
-		sinceVersionTag = functions.getInput("Version number to build latest objects from [" + versionTag + "]: ", 10)
-		if sinceVersionTag == "":
+		if has_build_tag:
 			sinceVersionTag = versionTag
+		else:
+			sinceVersionTag = functions.getInput("Version number to build latest objects from [" + versionTag + "]: ", 10)
+			if sinceVersionTag == "":
+				sinceVersionTag = versionTag
 
-		buildPDF = functions.getInput("Build PDF? [y/N]: ", 1)
+		if has_build_tag:
+			buildPDF = "N"
+		else:
+			buildPDF = functions.getInput("Build PDF? [y/N]: ", 1)
 
 		classes.Configuration.init(versionTag, sinceVersionTag, buildPDF)
 

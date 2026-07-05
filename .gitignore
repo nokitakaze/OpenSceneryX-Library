@@ -6,3 +6,4 @@ contributions
 bin/font
 .vscode
 CLITool
+.venv
